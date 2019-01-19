@@ -1,6 +1,8 @@
 #ifndef PACKET_H
 #define PACKET_H
 
+#define TRANS_PACKET_SIZE sizeof(uint32_t) + sizeof(void*)
+
 #include <stdint.h>
 
 typedef struct __attribute__ ((packed)) mng_pkt_s {
