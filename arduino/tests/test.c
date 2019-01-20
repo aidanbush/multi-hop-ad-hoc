@@ -59,6 +59,37 @@ void test_init_packet() {
     free_packet(pkt);
 }
 
+void test_next_hop() {
+    // test w/ valid ttl
+    uint8_t src = 1, hop = 0, dest = 0, ttl = 1, type = 0, new_hop = 1;
+
+    packet_s *pkt = init_packet(src, hop, dest, type, ttl);
+
+    assert(next_hop(pkt, new_hop) == ttl - 1);
+    assert(pkt->hop_id == new_hop);
+    assert(pkt->hop_id != hop);
+    assert(pkt->ttl == ttl - 1);
+
+    free_packet(pkt);
+
+    // test w/ invalid ttl
+    hop = 0;
+    new_hop = 1;
+    ttl = 0;
+
+    pkt = init_packet(src, hop, dest, type, ttl);
+
+    assert(next_hop(pkt, new_hop) == -1);
+    assert(pkt->hop_id != new_hop);
+    assert(pkt->hop_id == hop);
+    assert(pkt->ttl == ttl);
+
+    free_packet(pkt);
+
+    // test w/ NULL pkt
+    assert(next_hop(NULL, 1) == -1);
+}
+
 void test_packet() {
     // test size
     assert(sizeof(packet_s) == TRANS_PACKET_SIZE);
@@ -67,8 +98,7 @@ void test_packet() {
     test_init_packet();
 
     // test next hop
-
-    // test free_packet
+    test_next_hop();
 
     printf("done packet.h\n");
 }

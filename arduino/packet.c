@@ -33,7 +33,7 @@ int next_hop(packet_s *pkt, uint8_t hop_id) {
         return -1;
 
     pkt->hop_id = hop_id;
-    return pkt->ttl--;
+    return --(pkt->ttl);
 }
 
 static void free_mng_pkt(mng_pkt_s *pkt) {
