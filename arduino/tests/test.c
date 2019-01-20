@@ -5,6 +5,10 @@
 #include <stdlib.h>
 
 #include "packet.h"
+#include "routing_tables.h"
+
+uint8_t id;
+route_table *routing_table;
 
 void print_buf(uint8_t *buf, int len) {
     for (int i = 0; i < len; i++)
@@ -125,7 +129,6 @@ void test_encode_mng_packet() {
     // test simple mng
     src = 1, hop = 2, dest = 4, ttl = 1, type = 0;
     buf = NULL;
-    len;
     mng_type = 0;
     uint8_t mng_buf[1] = {0x1};
     uint8_t mng_buf_len = 1;
@@ -191,6 +194,55 @@ void test_decode_mng_packets() {
     free_packet(pkt);
 }
 
+void test_create_table_req() {
+    packet_s *pkt = create_table_request();
+
+    assert(pkt->fields.source_id == id);
+    assert(pkt->fields.hop_id == BROADCAST_ID);
+    assert(pkt->fields.dest_id == BROADCAST_ID);
+    assert(pkt->fields.ttl == TABLE_REQ_TTL);
+    assert(pkt->fields.unused == 0);
+    assert(pkt->fields.type == MNG_PKT);
+
+    assert(pkt->mng->type == TABLE_REQ_TYPE);
+    assert(pkt->mng->data_len == TABLE_REQ_LEN);
+
+    free_packet(pkt);
+}
+
+void test_create_table_res() {
+    // set up table
+    routing_table = init_routing_table(id);
+    // add to table
+    add_to_table(routing_table, 1, 2, 4);
+    add_to_table(routing_table, 2, 2, 5);
+    add_to_table(routing_table, 1, 3, 6);
+
+    uint8_t dest = 7;
+    uint8_t data_len = 6;
+    uint8_t data[6] = {0x4, 0x1, 0x5, 0x2, 0x6, 0x1};
+
+    packet_s *pkt = create_table_response(dest);
+
+    assert(pkt->fields.source_id == id);
+    assert(pkt->fields.hop_id == dest);
+    assert(pkt->fields.dest_id == dest);
+    assert(pkt->fields.ttl == TABLE_RES_TTL);
+    assert(pkt->fields.unused == 0);
+    assert(pkt->fields.type == MNG_PKT);
+
+    assert(pkt->mng->type == TABLE_RES_TYPE);
+    assert(pkt->mng->data_len == data_len);
+
+    assert(memcmp(pkt->mng->data, data, data_len) == 0);
+
+    free_packet(pkt);
+
+    // free table
+    free_tables(routing_table);
+    routing_table = NULL;
+}
+
 void test_packet() {
     // test size
     assert(sizeof(packet_s) == TRANS_PACKET_SIZE);
@@ -206,6 +258,12 @@ void test_packet() {
 
     // test decode mng packets
     test_decode_mng_packets();
+
+    // table req
+    test_create_table_req();
+
+    // table res
+    test_create_table_res();
 
     printf("done packet.h\n");
 }

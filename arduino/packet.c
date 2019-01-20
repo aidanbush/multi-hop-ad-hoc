@@ -4,6 +4,10 @@
 #include <string.h>
 
 #include "packet.h"
+#include "routing_tables.h"
+
+extern uint8_t id;
+extern route_table *routing_table;
 
 // init packet
 packet_s *init_packet(uint8_t source_id, uint8_t hop_id, uint8_t dest_id,
@@ -177,6 +181,7 @@ static uint8_t *encode_app_pkt(packet_s *pkt, uint8_t *size) {
     // trans header
 
     // app data
+    return NULL;
 }
 
 uint8_t *encode_packet(packet_s *pkt, uint8_t *len) {
@@ -246,4 +251,64 @@ void free_packet(packet_s *pkt) {
     }
 
     free(pkt);
+}
+
+// Management packets
+
+packet_s *create_table_request() {
+    packet_s *pkt = init_packet(id, BROADCAST_ID, BROADCAST_ID, MNG_PKT,
+            TABLE_REQ_TTL);
+    if (pkt == NULL)
+        return NULL;
+
+    pkt->mng = init_mng_pkt(TABLE_REQ_TYPE, NULL, TABLE_REQ_LEN);
+    if (pkt->mng == NULL) {
+        free(pkt);
+        return NULL;
+    }
+
+    return pkt;
+}
+
+static uint8_t *table_res_buf(uint8_t *buf_len) {
+    uint8_t len = routing_table->end - routing_table->capacity;
+    if (len * 2 > TABLE_RES_MAX_LEN)
+        len = TABLE_RES_MAX_LEN / 2;
+
+    uint8_t *buf = malloc(sizeof(uint8_t) * len * 2);
+    if (buf == NULL)
+        return NULL;
+
+    for (int i = 0; i < len; i++) {
+        buf[2 * i] = routing_table->routes[i].dest;
+        buf[2 * i + 1] = routing_table->routes[i].hops;
+    }
+    *buf_len = len * 2;
+
+    return buf;
+}
+
+// no hops so hop = dest
+packet_s *create_table_response(uint8_t dest) {
+    packet_s *pkt = init_packet(id, dest, dest, MNG_PKT, TABLE_RES_TTL);
+    if (pkt == NULL)
+        return NULL;
+
+    // create data section
+    uint8_t buf_len;
+    uint8_t *buf = table_res_buf(&buf_len);
+    if (buf == NULL) {
+        free(pkt);
+        return NULL;
+    }
+
+    pkt->mng = init_mng_pkt(TABLE_RES_TYPE, buf, buf_len);
+    if (pkt->mng == NULL) {
+        free(pkt);
+        free(buf);
+        return NULL;
+    }
+
+    free(buf);
+    return pkt;
 }

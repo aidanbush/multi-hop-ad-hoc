@@ -14,14 +14,19 @@ route_table* init_routing_table (uint8_t id) {
 }
 
 void free_tables (route_table *table) {
-    free(table->routes);
+    if (table == NULL)
+        return;
+
+    if (table->routes != NULL)
+        free(table->routes);
+
     free(table);
 }
 
 void add_to_table(route_table *table, uint8_t hops, uint8_t source, uint8_t dest) {
     for (int i = 0; i < table->capacity; i++) {
         if (source == table->routes[i].id &&
-                dest == table->routes[i].dest)
+                dest == table->routes[i].dest) {
 
             if (hops == table->routes[i].hops) {
                 //don't add if already in table
@@ -30,6 +35,7 @@ void add_to_table(route_table *table, uint8_t hops, uint8_t source, uint8_t dest
                 //change hops if they change
                 table->routes[i].hops = hops;
             }
+        }
     }
 
     for (int i = 0; i < table->end; i++) {

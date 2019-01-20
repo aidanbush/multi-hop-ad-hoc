@@ -3,13 +3,31 @@
 
 #include <stdint.h>
 
+#define MAX_PACKET_LEN      64
+
 #define TRANS_PACKET_SIZE   sizeof(uint32_t) + sizeof(void*)
 
 #define MNG_PKT             0
 #define APP_PKT             1
 
 #define PACKET_HEADER_LEN   4
+#define PACKET_TAIL_LEN     0
 #define MNG_PKT_HEADER_LEN  1
+
+#define MNG_DATA_MAX_LEN    (MAX_PACKET_LEN - (PACKET_HEADER_LEN \
+        + PACKET_TAIL_LEN + MNG_PKT_HEADER_LEN))
+
+#define BROADCAST_ID        0
+
+#define TABLE_REQ_TYPE      0
+
+#define TABLE_REQ_TTL       1
+#define TABLE_REQ_LEN       0
+
+#define TABLE_RES_TYPE      1
+
+#define TABLE_RES_TTL       1
+#define TABLE_RES_MAX_LEN   (MNG_DATA_MAX_LEN - (MNG_DATA_MAX_LEN % 2))
 
 typedef struct __attribute__ ((packed)) mng_pkt_s {
     uint8_t unused: 4;
@@ -61,5 +79,11 @@ mng_pkt_s *init_mng_pkt(uint8_t type, uint8_t *data, int len);
 uint8_t *encode_packet(packet_s *pkt, uint8_t *len);
 
 packet_s *decode_pkt(uint8_t *buf, uint8_t buf_len);
+
+// Management packets
+
+packet_s *create_table_request();
+
+packet_s *create_table_response(uint8_t dest);
 
 #endif /* PACKET_H */
