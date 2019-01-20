@@ -6,6 +6,12 @@
 
 #include "packet.h"
 
+void print_buf(uint8_t *buf, int len) {
+    for (int i = 0; i < len; i++)
+        printf("%02x ", buf[i]);
+    printf("\n");
+}
+
 void test_init_packet() {
     uint8_t src = 0, hop = 0, dest = 0, ttl = 0, type = 0;
 
@@ -92,7 +98,7 @@ void test_next_hop() {
     assert(next_hop(NULL, 1) == -1);
 }
 
-void test_encode_packet() {
+void test_encode_mng_packet() {
     // test simple mng packet
     uint8_t src = 1, hop = 2, dest = 4, ttl = 1, type = 0;
     uint8_t *buf = NULL;
@@ -108,10 +114,7 @@ void test_encode_packet() {
 
     buf = encode_packet(pkt, &len);
 
-    for (int i = 0; i < len; i++) {
-        printf("%02x ", buf[i]);
-    }
-    printf("\n");
+    print_buf(buf, len);
 
     // test
     assert(soln_len == len);
@@ -136,16 +139,56 @@ void test_encode_packet() {
 
     buf = encode_packet(pkt, &len);
 
-    for (int i = 0; i < len; i++) {
-        printf("%02x ", buf[i]);
-    }
-    printf("\n");
+    print_buf(buf, len);
 
     // test
     assert(soln_len == len);
     assert(memcmp(buf, soln2, soln_len) == 0);
     free_packet(pkt);
     free(buf);
+}
+
+void test_decode_mng_packets() {
+    // test simple management packet
+    uint8_t buf1[5] = {0x4, 0x20, 0xc5, 0x0, 0x0};
+    uint8_t buf_len = 5;
+    uint8_t hop = 1, src = 2, dest = 3, ttl = 5, mng_type = 0, mng_len = 0;
+
+    packet_s *pkt = decode_pkt(buf1, buf_len);
+
+    assert(pkt->fields.hop_id == hop);
+    assert(pkt->fields.source_id == src);
+    assert(pkt->fields.dest_id == dest);
+    assert(pkt->fields.ttl == ttl);
+    assert(pkt->fields.type == MNG_PKT);
+
+    assert(pkt->mng->type == mng_type);
+    assert(pkt->mng->data_len == mng_len);
+
+    free_packet(pkt);
+
+    // test mng with data
+    uint8_t buf2[7] = {0x4, 0x20, 0xc5, 0x0, 0x1, 0x0, 0xc3};
+    buf_len = 7;
+    hop = 1, src = 2, dest = 3, ttl = 5, mng_type = 1, mng_len = 2;
+    uint8_t soln2[2] = {0x0, 0xc3};
+
+    pkt = decode_pkt(buf2, buf_len);
+
+    assert(pkt->fields.hop_id == hop);
+    assert(pkt->fields.source_id == src);
+    assert(pkt->fields.dest_id == dest);
+    assert(pkt->fields.ttl == ttl);
+    assert(pkt->fields.type == MNG_PKT);
+
+    assert(pkt->mng->type == mng_type);
+    assert(pkt->mng->data_len == mng_len);
+
+    print_buf(pkt->mng->data, mng_len);
+
+    assert(memcmp(pkt->mng->data, soln2, mng_len) == 0);
+
+    free_packet(pkt);
 }
 
 void test_packet() {
@@ -158,8 +201,11 @@ void test_packet() {
     // test next hop
     test_next_hop();
 
-    // test encode packets
-    test_encode_packet();
+    // test encode mng packets
+    test_encode_mng_packet();
+
+    // test decode mng packets
+    test_decode_mng_packets();
 
     printf("done packet.h\n");
 }

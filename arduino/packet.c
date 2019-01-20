@@ -64,16 +64,16 @@ static mng_pkt_s *decode_mng(uint8_t *data, uint8_t len) {
             len - MNG_PKT_HEADER_LEN);
 }
 
-static packet_s *decode_pkt(uint8_t *buffer, uint8_t len) {
+packet_s *decode_pkt(uint8_t *buffer, uint8_t len) {
     if (len < PACKET_HEADER_LEN) {
         return NULL;
     }
 
     // decode header
-    uint8_t hop = buffer[0] & 0xfc >> 2;
-    uint8_t src = (buffer[0] & 0x3 << 4) | (buffer[1] & 0xf0 >> 4);
-    uint8_t dest = (buffer[1] & 0xf << 2) | (buffer[2] & 0xc0 >> 6);
-    uint8_t ttl = buffer[2] & 0xcf;
+    uint8_t hop = (buffer[0] & 0xfc) >> 2;
+    uint8_t src = ((buffer[0] & 0x3) << 4) | ((buffer[1] & 0xf0) >> 4);
+    uint8_t dest = ((buffer[1] & 0xf) << 2) | ((buffer[2] & 0xc0) >> 6);
+    uint8_t ttl = buffer[2] & 0x3f;
     uint8_t type = buffer[3] & 1;
 
     packet_s *pkt = init_packet(src, hop, dest, type, ttl);
@@ -84,7 +84,9 @@ static packet_s *decode_pkt(uint8_t *buffer, uint8_t len) {
             pkt->mng = decode_mng(buffer + PACKET_HEADER_LEN, len - PACKET_HEADER_LEN);
             break;
         case APP_PKT:
+#ifdef _TEST
             fprintf(stderr, "not implemented\n");
+#endif /* _TEST */
             break;
         default:
             // error
@@ -167,6 +169,16 @@ static uint8_t *encode_mng_pkt(packet_s *pkt, uint8_t *size) {
     return buf;
 }
 
+static uint8_t *encode_app_pkt(packet_s *pkt, uint8_t *size) {
+    // get packet size
+
+    // create buffer
+
+    // trans header
+
+    // app data
+}
+
 uint8_t *encode_packet(packet_s *pkt, uint8_t *len) {
     uint8_t *buf = NULL;
 
@@ -175,7 +187,9 @@ uint8_t *encode_packet(packet_s *pkt, uint8_t *len) {
             buf = encode_mng_pkt(pkt, len);
             break;
         case APP_PKT:
+#ifdef _TEST
             fprintf(stderr, "not implemented\n");
+#endif /* _TEST */
             break;
         default:
             // error

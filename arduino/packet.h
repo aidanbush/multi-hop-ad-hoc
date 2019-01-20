@@ -60,4 +60,6 @@ mng_pkt_s *init_mng_pkt(uint8_t type, uint8_t *data, int len);
 
 uint8_t *encode_packet(packet_s *pkt, uint8_t *len);
 
+packet_s *decode_pkt(uint8_t *buf, uint8_t buf_len);
+
 #endif /* PACKET_H */
