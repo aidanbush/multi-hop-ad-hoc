@@ -7,6 +7,7 @@
 #include "routing_tables.h"
 #include "help.h"
 #include "options.h"
+#include "main_loop.h"
 
 RH_ASK driver;
 
@@ -27,6 +28,7 @@ void setup() {
 
 void loop() {
     // check if need to update routing table
+    check_update_table();
 
     // if serial deal with
 
