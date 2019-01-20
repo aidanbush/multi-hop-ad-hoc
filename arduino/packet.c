@@ -173,6 +173,7 @@ static uint8_t *encode_mng_pkt(packet_s *pkt, uint8_t *size) {
     return buf;
 }
 
+/*
 static uint8_t *encode_app_pkt(packet_s *pkt, uint8_t *size) {
     // get packet size
 
@@ -183,6 +184,7 @@ static uint8_t *encode_app_pkt(packet_s *pkt, uint8_t *size) {
     // app data
     return NULL;
 }
+*/
 
 uint8_t *encode_packet(packet_s *pkt, uint8_t *len) {
     uint8_t *buf = NULL;
@@ -254,7 +256,6 @@ void free_packet(packet_s *pkt) {
 }
 
 // Management packets
-
 packet_s *create_table_request() {
     packet_s *pkt = init_packet(id, BROADCAST_ID, BROADCAST_ID, MNG_PKT,
             TABLE_REQ_TTL);

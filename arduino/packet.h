@@ -65,6 +65,10 @@ typedef struct __attribute__ ((packed)) packet_s {
     // TODO add checksums
 } packet_s;
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 packet_s *init_packet(uint8_t source_id, uint8_t hop_id, uint8_t dest_id,
         uint8_t type, uint8_t ttl);
 
@@ -85,5 +89,9 @@ packet_s *decode_pkt(uint8_t *buf, uint8_t buf_len);
 packet_s *create_table_request();
 
 packet_s *create_table_response(uint8_t dest);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* PACKET_H */
