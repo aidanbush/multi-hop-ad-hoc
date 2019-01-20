@@ -7,32 +7,26 @@
 #include <string.h>
 #include <stdint.h>
 
-#define BUF_LEN     20
+#define BUF_LEN     64
 
 int read_test(int fd) {
     size_t len = BUF_LEN;
-    ssize_t rd;
+
     char buf[BUF_LEN + 1] = {0};
 
-    printf("read\n");
+    read(fd, buf, len);
 
-    while ((rd = read(fd, buf, len)) > 0) {
-        for (ssize_t i = 0; i < rd; i++)
-            printf("%c", buf[i]);
-    }
-    printf("\nerr %ld\n", rd);
+	printf("%s", buf);
 
-    return rd;
+    return 1;
 }
 
-int write_test(int fd) {
-    uint8_t msg[BUF_LEN] = "send message\r\n";
+int write_test(int fd, uint8_t *msg) {
     int len = strnlen((char *)msg, BUF_LEN - 1);
-
+	printf("echo: %s\n", (char *)msg);
     int err = write(fd, msg, len);
     if (err < 0)
-        perror("write");
-    printf("write\n");
+        perror("write err");
 
     return err;
 }
@@ -41,8 +35,12 @@ int write_test(int fd) {
 int comm(char *dev) {
     int fd;
     int err;
+	size_t len = BUF_LEN;
+	char *msg;
     speed_t baud = B115200;
     struct termios options;
+
+	msg = malloc(BUF_LEN);
 
     fd = open(dev, O_RDWR);
     if (fd < 0) {
@@ -64,9 +62,17 @@ int comm(char *dev) {
 
     /* write settings */
     tcsetattr(fd, TCSANOW, &options);
-
-    write_test(fd);
-    read_test(fd);
+	
+	/* Here we jump into an infinite loop communicating
+	   with the arduino.
+	   The user has to ^C to get out for now
+	*/
+	while(1) {
+		getline(&msg, &len, stdin);
+		write_test(fd, (uint8_t *)msg);
+		sleep(1);
+		read_test(fd);
+	}
 
     err = close(fd);
     if (err == -1)
@@ -106,9 +112,11 @@ int main(int argc, char **argv) {
     if (tty_dev == NULL) {
         print_usage(argv[0]);
         exit(1);
-    }
+    } else {
+		comm(tty_dev);
+	}
 
-    comm(tty_dev);
+
 
     return 0;
 }
