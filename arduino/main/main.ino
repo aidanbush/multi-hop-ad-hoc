@@ -12,7 +12,7 @@ RH_ASK driver;
 
 unsigned long next;
 uint8_t id = 1;
-route_table* routing_table;
+route_table *routing_table;
 
 void setup() {
     set_id(DEFAULT_ID);
