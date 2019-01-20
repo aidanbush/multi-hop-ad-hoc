@@ -1,42 +1,38 @@
+#ifndef ROUTING_TABLES_H
+#define ROUTING_TABLES_H
 
-#ifndef ROUTING_TABLES
-#define ROUTING_TABLES
 #include <stdint.h>
 
 //starting memory allocation, and rate at which it grows.
 #define ROUTING_TABLE_SIZE 10
 
-
-struct route {
-
+typedef struct route __attribute__ ((packed)) {
     uint8_t id;
     uint8_t dest;
     uint8_t hops;
+} route;
 
-} typedef route;
-
-
-struct route_table {
-
+typedef struct route_table __attribute__ ((packed)) {
     uint8_t id;
     uint8_t capacity;
     uint8_t end;
-    route *routes; 
-
-} typedef route_table;
+    route *routes;
+} route_table;
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
 route_table *init_routing_table (uint8_t id);
+
 void add_to_table(route_table *table, uint8_t hops, uint8_t source, uint8_t dest);
+
 void delete_from_table(route_table *table, uint8_t id);
+
 uint8_t get_next_hop(route_table *table, uint8_t dest);
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 
-#endif
-
+#endif /* ROUTING_TABLES_H */
