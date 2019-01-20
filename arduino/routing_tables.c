@@ -66,3 +66,20 @@ void delete_from_table(route_table *table, uint8_t id){
     } 
 }
 
+
+uint8_t get_next_hop(route_table *table, uint8_t dest) {
+
+    uint8_t min_hops = 128;
+    uint8_t next_hop = 0;
+
+    for (int i = 0; i< table->end; i++) {
+        if (table->routes[i].dest == dest) {
+            if (table->routes[i].hops < min_hops)
+                next_hop = table->routes[i].id;
+                min_hops = table->routes[i].hops;
+
+           
+        }
+    }
+    return next_hop; 
+}
