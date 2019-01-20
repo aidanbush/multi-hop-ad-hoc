@@ -61,7 +61,6 @@ void delete_from_table(route_table *table, uint8_t id){
             table->routes[i].hops = 0;
             table->routes[i].dest = 0;
             table->capacity++;
-            printf("deleting\n");
             
         }
     } 
