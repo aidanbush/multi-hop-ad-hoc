@@ -32,6 +32,7 @@ extern "C" {
 route_table *init_routing_table (uint8_t id);
 void add_to_table(route_table *table, uint8_t hops, uint8_t source, uint8_t dest);
 void delete_from_table(route_table *table, uint8_t id);
+uint8_t get_next_hop(route_table *table, uint8_t dest);
 
 #ifdef __cplusplus
 }
