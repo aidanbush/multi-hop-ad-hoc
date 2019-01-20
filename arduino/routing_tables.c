@@ -8,7 +8,7 @@ route_table* init_routing_table (uint8_t id) {
 
     route_table* router = calloc(1, sizeof(route_table));
     router->id = id;
-    router->len = 0;
+    router->capacity = ROUTING_TABLE_SIZE;
 
     //starting size for routes
     router->end = ROUTING_TABLE_SIZE;
@@ -24,29 +24,46 @@ void free_tables (route_table *table) {
 
 
 
-void add_to_table(route_table *table, route new_route) {
+void add_to_table(route_table *table, uint8_t hops, uint8_t source, uint8_t dest) {
     
 
-    for (int i = 0; i < table->len; i++) {
-        if (new_route.id == table->routes[i].id &&
-        new_route.dest == table->routes[i].dest)
+    for (int i = 0; i < table->capacity; i++) {
+        if (source == table->routes[i].id &&
+        dest == table->routes[i].dest)
 
-        if (new_route.hops == table->routes[i].hops) {
+        if (hops == table->routes[i].hops) {
             //don't add if already in table
             return;
         } else {
             //change hops if they change
-            table->routes[i].hops = new_route.hops;
+            table->routes[i].hops = hops;
         }
     }
 
-    table->routes[table->len].id = new_route.id;
-    table->routes[table->len].dest = new_route.dest;
-    table->routes[table->len].hops = new_route.hops;
-    table->len++;
+    for (int i = 0; i < table->end; i++) {
+        if (table->routes[i].id != 0)
+            continue;
+
+
+        table->routes[i].id = source;
+        table->routes[i].dest = dest;
+        table->routes[i].hops = hops;
+        table->capacity--;
+        return;
+    }
 
 }
 
-void delete_from_table(){
+void delete_from_table(route_table *table, uint8_t id){
+    for (int i = 0; i< table->end; i++) {
+        if (table->routes[i].id == id) {
+            table->routes[i].id = 0;
+            table->routes[i].hops = 0;
+            table->routes[i].dest = 0;
+            table->capacity++;
+            printf("deleting\n");
+            
+        }
+    } 
 }
 

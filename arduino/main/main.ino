@@ -2,20 +2,21 @@
 #include <RH_ASK.h>
 #include <SPI.h>
 #include "packet.h"
+#include "routing_tables.h"
+#include <stdint.h>
 
 RH_ASK driver;
 
 unsigned long next;
 int id = 1;
 int addr = 0;
-
+route_table* routing_table;
   
 void setup() {
-    
+
+     routing_table = init_routing_table(id);
      EEPROM.write(addr, id);
-     int value = EEPROM.read(addr);
     
-  
     Serial.begin(115200); // Debugging onlyM
     if (!driver.init())
          Serial.println("init failed");

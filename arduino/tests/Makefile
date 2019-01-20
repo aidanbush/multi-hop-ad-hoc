@@ -13,7 +13,7 @@ all: test test_router
 	
 test: packet.o
 
-test_router: routing_tables.o  routing_tables.h
+test_router: routing_tables.o routing_tables.h
 
 packet.o: packet.c packet.h
 
