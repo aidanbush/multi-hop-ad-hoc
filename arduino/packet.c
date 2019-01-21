@@ -81,6 +81,8 @@ packet_s *decode_pkt(uint8_t *buffer, uint8_t len) {
     uint8_t type = buffer[3] & 1;
 
     packet_s *pkt = init_packet(src, hop, dest, type, ttl);
+    if (pkt == NULL)
+        return NULL;
 
     // decode rest
     switch (type) {
@@ -91,6 +93,8 @@ packet_s *decode_pkt(uint8_t *buffer, uint8_t len) {
 #ifdef _TEST
             fprintf(stderr, "not implemented\n");
 #endif /* _TEST */
+            free(pkt);
+            return NULL;
             break;
         default:
             // error

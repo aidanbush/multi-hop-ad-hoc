@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include <RH_ASK.h>
+#include <SPI.h>
 #include <stdint.h>
 
 #include "main_loop.h"
@@ -7,6 +9,9 @@
 
 #define SECOND                  1000
 #define TABLE_UPDATE_SEP_TIME   (5 * (SECOND))
+
+extern RH_ASK driver;
+extern route_table *routing_table;
 
 //check of send req
 void check_update_table() {
@@ -30,4 +35,29 @@ void check_update_table() {
 
 //serial
 
+void handle_pkt(packet_s *pkt) {
+    // if not for me ignore
+    if ((pkt->hop != 0 || pkt->dest != 0) && (pkt->hop != id && pkt->dest != id))
+    // if duplicate ignore
+    // add packet to duplicate buffer
+
+    if (pkt->dest == id) {
+    } else {
+        // forward
+        // get new hop
+        get_next_hop(table, pkt->dest);
+        // send
+    }
+}
+
 //rx
+void check_rx() {
+    uint8_t buf[MAX_PACKET_LEN];
+    uint8_t buflen;
+
+    while (driver.recv(buf, &buflen)) {
+        packet_s *pkt = decode_pkt(buf, buflen);
+        handle_pkt(pkt);
+        free_packet(pkt);
+    }
+}

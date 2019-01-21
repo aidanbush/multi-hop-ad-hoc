@@ -3,7 +3,7 @@
 #include <SPI.h>
 #include <stdint.h>
 
-//#include "packet.h"
+#include "packet.h"
 #include "routing_tables.h"
 #include "help.h"
 #include "options.h"
@@ -33,4 +33,5 @@ void loop() {
     // if serial deal with
 
     // if rx deal with
+    check_rx();
 }
